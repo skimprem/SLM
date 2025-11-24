@@ -74,6 +74,18 @@ def site_upload_path(instance: "SiteFile", filename: str) -> str:
                         new_path = current_path.with_name(
                             f"{current_path.stem}_{archive.index.valid_range.lower.strftime('%H%M%S')}{current_path.suffix}"
                         )
+                        idx = 0
+                        while new_path.exists():
+                            if idx > 0:
+                                new_path = new_path.with_name(
+                                    f"{new_path.stem[: new_path.stem.rindex('-')]}-{idx}{new_path.suffix}"
+                                )
+                            else:
+                                new_path = new_path.with_name(
+                                    f"{new_path.stem}-{idx}{new_path.suffix}"
+                                )
+                            idx += 1
+
                         archive.file.name = archive.file.name.replace(
                             current_path.name, new_path.name
                         )
