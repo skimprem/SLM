@@ -54,11 +54,6 @@ def site_upload_path(instance: "SiteFile", filename: str) -> str:
     if instance.SUB_DIRECTORY:
         prefix = Path(instance.SUB_DIRECTORY)
     dest = prefix / instance.site.name / filename
-    timestamp = (
-        instance.index.begin
-        if isinstance(instance, ArchivedSiteLog)
-        else instance.timestamp
-    )
     if (Path(settings.MEDIA_ROOT) / dest).exists():
         stem, suffix = dest.stem, dest.suffix
         if isinstance(instance, ArchivedSiteLog):
@@ -95,6 +90,11 @@ def site_upload_path(instance: "SiteFile", filename: str) -> str:
             except ArchivedSiteLog.DoesNotExist:
                 (Path(settings.MEDIA_ROOT) / dest).unlink()
         else:
+            timestamp = (
+                instance.index.begin
+                if isinstance(instance, ArchivedSiteLog)
+                else (instance.timestamp or now())
+            )
             dest = dest.with_name(f"{stem}_{timestamp.strftime('%H%M%S')}{suffix}")
     return dest.as_posix()
 
@@ -454,6 +454,9 @@ class SiteFile(models.Model):
         if hasattr(self, "name"):
             return f"[{self.site.name}] {self.name}"
         return f"[{self.site.name}] {os.path.basename(self.file.path)}"
+
+    def upload_path(self, filename: str) -> str:
+        return site_upload_path(instance=self, filename=filename)
 
     class Meta:
         abstract = True

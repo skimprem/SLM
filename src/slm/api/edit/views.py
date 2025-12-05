@@ -1654,7 +1654,10 @@ class SiteFileUploadViewSet(
 
         file = self.get_object()
         if request.GET.get("thumbnail", None):
-            file = file.thumbnail
+            if not file.has_thumbnail:
+                file.generate_thumbnail()
+                file.save()
+            file = file.thumbnail or file.file
         else:
             file = file.file
         return FileResponse(
