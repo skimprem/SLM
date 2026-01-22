@@ -518,9 +518,13 @@ class DownloadView(StationContextView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        indexed_formats = set(
-            ctx["site"].indexes.first().files.values_list("log_format", flat=True)
-        )
+        first_index = ctx["site"].indexes.first()
+        if first_index:
+            indexed_formats = set(
+                first_index.files.values_list("log_format", flat=True)
+            )
+        else:
+            indexed_formats = set()
         return {
             "has_ascii": SiteLogFormat.ASCII_9CHAR in indexed_formats
             or SiteLogFormat.LEGACY in indexed_formats,
