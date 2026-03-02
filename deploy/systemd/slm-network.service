@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn instance to serve SLM Network
+After=network.target postgresql@16-main.service
+
+[Service]
+User=roman
+Group=www-data
+WorkingDirectory=/home/roman/gitrepo/SLM/network
+Environment="SLM_ENV=/var/www/network/production/.env"
+Environment="DJANGO_SETTINGS_MODULE=sites.network.production"
+Environment="PYTHONPATH=/home/roman/gitrepo/SLM/network/src"
+ExecStart=/snap/bin/uv run gunicorn --workers 4 --bind unix:/var/www/network/production/slm.sock sites.network.production.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
